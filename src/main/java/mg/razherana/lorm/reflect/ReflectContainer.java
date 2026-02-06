@@ -449,13 +449,17 @@ public class ReflectContainer {
   }
 
   public void setValueFromResultSet(Lorm<?> lorm, ResultSet resultSet) {
-    for (ColumnInfo columnInfo : columns) {
+    var cols = new ArrayList<>(columns);
+    for (ColumnInfo columnInfo : cols) {
       try {
         Object value = resultSet.getObject(columnInfo.columnName);
 
         if (lorm.getBeforeIn().containsKey(columnInfo.columnName))
           value = lorm.getBeforeIn().get(columnInfo.columnName).apply(value);
 
+        System.out.println("[Lorm:info] -> Set value for " + columnInfo.columnName + " : " + value + " ("
+            + value.getClass() + ") " + " for setter "
+            + columnInfo.setter);
         columnInfo.setter.invoke(lorm, value);
 
         lorm.getOldValues().put(columnInfo.columnName, value);

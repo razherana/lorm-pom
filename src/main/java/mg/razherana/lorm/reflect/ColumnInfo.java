@@ -57,4 +57,13 @@ public class ColumnInfo {
   public Class<? extends Lorm<?>> getForeignModel() {
     return foreignModel;
   }
+
+  @Override
+  public String toString() {
+    return "ColumnInfo {columnName=" + columnName + ", getterName=" + getterName + ", setterName=" + setterName
+        + ", field=" + field + ", getter=" + getter + ", setter=" + setter + ", primaryKey=" + primaryKey
+        + ", foreignKey=" + foreignKey + ", foreignName=" + foreignName + ", foreignModel=" + foreignModel
+        + ", indexed=" + indexed + "}";
+  }
+
 }
