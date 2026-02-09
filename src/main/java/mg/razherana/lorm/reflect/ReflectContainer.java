@@ -454,8 +454,11 @@ public class ReflectContainer {
       try {
         Object value = resultSet.getObject(columnInfo.columnName);
 
-        if (lorm.getBeforeIn().containsKey(columnInfo.columnName))
-          value = lorm.getBeforeIn().get(columnInfo.columnName).apply(value);
+        // We apply the beforeIn functions if they exist
+        if (getBeforeIn().containsKey(columnInfo.columnName)) {
+          System.out.println("[Lorm:info] -> Apply beforeIn for " + columnInfo.columnName + " with value " + value);
+          value = getBeforeIn().get(columnInfo.columnName).apply(value);
+        }
 
         System.out.println("[Lorm:info] -> Set value for " + columnInfo.columnName + " : " + value + " ("
             + value.getClass() + ") " + " for setter "

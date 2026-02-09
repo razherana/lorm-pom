@@ -113,7 +113,7 @@ abstract public class Lorm<T extends Lorm<T>> {
     return reflectContainer;
   }
 
-  public Map<String, Function<Object, ?>> getBeforeOut() {
+  public final Map<String, Function<Object, ?>> getBeforeOut() {
     return beforeOut;
   }
 
@@ -121,7 +121,7 @@ abstract public class Lorm<T extends Lorm<T>> {
     this.beforeOut = beforeOut;
   }
 
-  public Map<String, Function<Object, ?>> getBeforeIn() {
+  public final Map<String, Function<Object, ?>> getBeforeIn() {
     return beforeIn;
   }
 
