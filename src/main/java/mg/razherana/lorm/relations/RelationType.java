@@ -1,6 +1,7 @@
 package mg.razherana.lorm.relations;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiPredicate;
 
 import mg.razherana.lorm.Lorm;
@@ -40,7 +41,7 @@ public enum RelationType {
 
   @FunctionalInterface
   public static interface CheckAndAddToData {
-    public void apply(ArrayList<Lorm<?>> models1, ArrayList<Lorm<?>> models2, BiPredicate<Lorm<?>, Lorm<?>> condition,
+    public void apply(List<Lorm<?>> models1, List<Lorm<?>> models2, BiPredicate<Lorm<?>, Lorm<?>> condition,
         String relationName);
   }
 

@@ -133,7 +133,7 @@ abstract public class Lorm<T extends Lorm<T>> {
     reflectContainer.setValueFromResultSet(this, resultSet);
   }
 
-  public ArrayList<T> query(String query, Object[] queryParams, Connection connection) throws SQLException {
+  public List<T> query(String query, Object[] queryParams, Connection connection) throws SQLException {
     PreparedStatement preparedStatement = connection.prepareStatement(query);
 
     System.out.println("[" + getClass() + ":query] -> " + query);
@@ -168,7 +168,7 @@ abstract public class Lorm<T extends Lorm<T>> {
     return result;
   }
 
-  public ArrayList<T> query(String query, Connection connection) throws SQLException {
+  public List<T> query(String query, Connection connection) throws SQLException {
     return query(query, new Object[] {}, connection);
   }
 
@@ -177,16 +177,14 @@ abstract public class Lorm<T extends Lorm<T>> {
     if (primaryKey == null)
       return null;
 
-    ArrayList<T> ts = where(
-        new ArrayList<>(
-            List.of(
-                new WhereContainer(primaryKey.getColumnName(), id, "="))),
+    List<T> ts = where(
+        List.of(new WhereContainer(primaryKey.getColumnName(), id, "=")),
         connection);
 
     return ts.size() > 0 ? ts.get(0) : null;
   }
 
-  public ArrayList<T> where(String extraQuery, ArrayList<WhereContainer> whereContainers, Connection connection)
+  public List<T> where(String extraQuery, List<WhereContainer> whereContainers, Connection connection)
       throws SQLException {
     String query = "SELECT * FROM " + reflectContainer.getTable();
     var where = WhereContainer.toConditionClause(whereContainers);
@@ -202,12 +200,12 @@ abstract public class Lorm<T extends Lorm<T>> {
     return query(query, queryParams, connection);
   }
 
-  public ArrayList<T> where(ArrayList<WhereContainer> whereContainers, Connection connection) throws SQLException {
+  public List<T> where(List<WhereContainer> whereContainers, Connection connection) throws SQLException {
     return where("", whereContainers, connection);
   }
 
-  public ArrayList<T> all(Connection connection) throws SQLException {
-    return where("", new ArrayList<>(), connection);
+  public List<T> all(Connection connection) throws SQLException {
+    return where("", List.of(), connection);
   }
 
   public void save(Connection connection) throws SQLException {
@@ -395,7 +393,7 @@ abstract public class Lorm<T extends Lorm<T>> {
       throw new RuntimeException("Error instanciating the other model...", e);
     }
 
-    ArrayList<U> otherModels = other.all(connection);
+    ArrayList<U> otherModels = new ArrayList<>(other.all(connection));
     @SuppressWarnings("unchecked")
     final T thisT = (T) this;
     otherModels.removeIf((o) -> !relation.getCondition().test(thisT, o));
@@ -418,7 +416,7 @@ abstract public class Lorm<T extends Lorm<T>> {
       throw new RuntimeException("Error instanciating the other model...", e);
     }
 
-    ArrayList<U> otherModels = other.all(connection);
+    ArrayList<U> otherModels = new ArrayList<>(other.all(connection));
 
     relation.getRelationSetter().apply((ArrayList<Lorm<?>>) models, (ArrayList<Lorm<?>>) otherModels,
         (BiPredicate<Lorm<?>, Lorm<?>>) relation.getCondition(),
@@ -477,7 +475,7 @@ abstract public class Lorm<T extends Lorm<T>> {
       throw new RuntimeException("Error instanciating the other model...", e);
     }
 
-    ArrayList<U> otherModels = other.all(connection);
+    ArrayList<U> otherModels = new ArrayList<>(other.all(connection));
     @SuppressWarnings("unchecked")
     final T thisT = (T) this;
     otherModels.removeIf((o) -> !relation.getCondition().test(thisT, o));
@@ -486,7 +484,7 @@ abstract public class Lorm<T extends Lorm<T>> {
   }
 
   @SuppressWarnings("unchecked")
-  private static <U extends Lorm<U>, T extends Lorm<T>> void belongsToStatic(ArrayList<T> models,
+  private static <U extends Lorm<U>, T extends Lorm<T>> void belongsToStatic(List<T> models,
       Relation<T, U> relation, Connection connection, HashSet<NestedEagerLoad> nestedLoads) throws SQLException {
     U other;
     try {
@@ -499,7 +497,7 @@ abstract public class Lorm<T extends Lorm<T>> {
       throw new RuntimeException("Error instanciating the other model...", e);
     }
 
-    ArrayList<U> otherModels = other.all(connection);
+    ArrayList<U> otherModels = new ArrayList<>(other.all(connection));
 
     relation.getRelationSetter().apply((ArrayList<Lorm<?>>) models, (ArrayList<Lorm<?>>) otherModels,
         (BiPredicate<Lorm<?>, Lorm<?>>) relation.getCondition(),

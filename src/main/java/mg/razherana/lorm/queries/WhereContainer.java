@@ -1,6 +1,7 @@
 package mg.razherana.lorm.queries;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class WhereContainer {
@@ -34,7 +35,7 @@ public class WhereContainer {
     this.intoParameters = intoParameters;
   }
 
-  public static Map.Entry<String, Object[]> toConditionClause(ArrayList<WhereContainer> whereContainers) {
+  public static Map.Entry<String, Object[]> toConditionClause(List<WhereContainer> whereContainers) {
     if (whereContainers == null || whereContainers.size() == 0) 
       return Map.entry("", new Object[] {});
     
