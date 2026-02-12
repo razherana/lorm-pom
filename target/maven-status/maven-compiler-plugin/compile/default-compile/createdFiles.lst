@@ -33,6 +33,7 @@ mg/razherana/lorm/reflect/ReflectContainer.class
 mg/razherana/generator/dbproperties/Column.class
 mg/razherana/lorm/exceptions/LormException.class
 mg/razherana/lorm/relations/Relation.class
+mg/razherana/lorm/exceptions/ModelNotFoundException.class
 mg/razherana/database/exceptions/DriverNotLoadedException.class
 mg/razherana/lorm/exceptions/AnnotationException.class
 mg/razherana/generator/exceptions/ConfigNotInitializedException.class

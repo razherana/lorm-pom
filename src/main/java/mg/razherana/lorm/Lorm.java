@@ -1,5 +1,6 @@
 package mg.razherana.lorm;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -16,6 +17,7 @@ import java.util.function.BiPredicate;
 import java.util.function.Function;
 
 import mg.razherana.lorm.exceptions.LormException;
+import mg.razherana.lorm.exceptions.ModelNotFoundException;
 import mg.razherana.lorm.exceptions.RelationNotFoundException;
 import mg.razherana.lorm.queries.WhereContainer;
 import mg.razherana.lorm.reflect.ReflectContainer;
@@ -251,6 +253,9 @@ abstract public class Lorm<T extends Lorm<T>> {
   }
 
   public void update(Connection connection) throws SQLException {
+    if (!isLoaded())
+      throw new LormException("Cannot update a model that is not loaded");
+
     String query = "UPDATE " + reflectContainer.getTable() + " SET ";
 
     ArrayList<Object> queryParams = new ArrayList<>();
@@ -295,6 +300,9 @@ abstract public class Lorm<T extends Lorm<T>> {
   }
 
   public void delete(Connection connection) throws SQLException {
+    if (!isLoaded())
+      throw new LormException("Cannot delete a model that is not loaded");
+
     String query = "DELETE FROM " + reflectContainer.getTable();
 
     ArrayList<Object> queryParams = new ArrayList<>();
@@ -326,6 +334,31 @@ abstract public class Lorm<T extends Lorm<T>> {
 
     preparedStatement.executeUpdate();
     preparedStatement.close();
+  }
+
+  public void load(Connection connection) throws SQLException, ModelNotFoundException {
+    if (reflectContainer.getPrimaryKey() == null)
+      throw new LormException("Cannot load a model without primary key");
+
+    var primaryKey = reflectContainer.getPrimaryKey();
+    Object id = null;
+    try {
+      id = primaryKey.getGetter().invoke(this);
+    } catch (IllegalAccessException | InvocationTargetException e) {
+      throw new LormException(e.getMessage());
+    }
+
+    if (id == null)
+      throw new LormException("Cannot load a model with null primary key");
+
+    T loaded = find(id, connection);
+
+    if (loaded == null)
+      throw new ModelNotFoundException("No model found with the given primary key");
+
+    getOldValues().putAll(loaded.getOldValues());
+
+    setLoaded(true);
   }
 
   public Map<String, Relation<? extends Lorm<?>, ? extends Lorm<?>>> relations() {

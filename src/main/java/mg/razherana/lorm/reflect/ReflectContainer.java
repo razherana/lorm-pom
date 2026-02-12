@@ -559,4 +559,9 @@ public class ReflectContainer {
   public ColumnInfo getPrimaryKey() {
     return primaryKey;
   }
+
+  public <T extends Lorm<T>> void copyValues(T loaded, Lorm<T> lorm) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'copyValues'");
+  }
 }
