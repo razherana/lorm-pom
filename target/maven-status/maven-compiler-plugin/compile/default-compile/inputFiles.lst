@@ -16,6 +16,7 @@
 /home/razherana/Documents/Projets/Java/lorm-pom/src/main/java/mg/razherana/lorm/Lorm.java
 /home/razherana/Documents/Projets/Java/lorm-pom/src/main/java/mg/razherana/lorm/annot/columns/Column.java
 /home/razherana/Documents/Projets/Java/lorm-pom/src/main/java/mg/razherana/lorm/annot/columns/ForeignColumn.java
+/home/razherana/Documents/Projets/Java/lorm-pom/src/main/java/mg/razherana/lorm/annot/columns/NotColumn.java
 /home/razherana/Documents/Projets/Java/lorm-pom/src/main/java/mg/razherana/lorm/annot/general/Table.java
 /home/razherana/Documents/Projets/Java/lorm-pom/src/main/java/mg/razherana/lorm/annot/relations/BelongsTo.java
 /home/razherana/Documents/Projets/Java/lorm-pom/src/main/java/mg/razherana/lorm/annot/relations/BelongsToContainer.java

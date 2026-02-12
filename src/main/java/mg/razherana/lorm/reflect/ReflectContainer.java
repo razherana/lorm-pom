@@ -1,5 +1,6 @@
 package mg.razherana.lorm.reflect;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -14,6 +15,7 @@ import java.util.function.Function;
 import mg.razherana.lorm.Lorm;
 import mg.razherana.lorm.annot.columns.Column;
 import mg.razherana.lorm.annot.columns.ForeignColumn;
+import mg.razherana.lorm.annot.columns.NotColumn;
 import mg.razherana.lorm.annot.general.Table;
 import mg.razherana.lorm.annot.relations.BelongsTo;
 import mg.razherana.lorm.annot.relations.EagerLoad;
@@ -69,7 +71,41 @@ public class ReflectContainer {
 
     for (Field field : fields) {
       Column column = field.getDeclaredAnnotation(Column.class);
-      if (column != null) {
+
+      if (field.getDeclaredAnnotation(NotColumn.class) == null) {
+        if (column == null)
+          column = new Column() {
+            @Override
+            public String value() {
+              return "";
+            }
+
+            @Override
+            public Class<? extends Annotation> annotationType() {
+              return Column.class;
+            }
+
+            @Override
+            public boolean primaryKey() {
+              return false;
+            }
+
+            @Override
+            public String getter() {
+              return "";
+            }
+
+            @Override
+            public String setter() {
+              return "";
+            }
+
+            @Override
+            public boolean indexed() {
+              return false;
+            }
+          };
+
         ColumnInfo columnInfo = new ColumnInfo();
         columnInfo.columnName = column.value().isEmpty() ? field.getName() : column.value();
         columnInfo.field = field;

@@ -5,12 +5,14 @@ mg/razherana/generator/utils/ConventionStringBuilder.class
 mg/razherana/generator/dbproperties/Database.class
 mg/razherana/lorm/reflect/ColumnInfo.class
 mg/razherana/lorm/annot/relations/BelongsTo.class
+mg/razherana/lorm/reflect/ReflectContainer$1.class
 mg/razherana/generator/utils/ConventionStringBuilder$Convention.class
 mg/razherana/generator/utils/SqlTypeToJavaType.class
 mg/razherana/database/DatabaseConnection.class
 mg/razherana/generator/exceptions/InvalidConfigFileException.class
 mg/razherana/lorm/relations/RelationType$CheckAndAddToData.class
 mg/razherana/generator/file/FileGenerator.class
+mg/razherana/lorm/annot/columns/NotColumn.class
 mg/razherana/lorm/annot/relations/BelongsToContainer.class
 mg/razherana/generator/relations/RelationConfigs$1.class
 mg/razherana/generator/dbproperties/Table.class
