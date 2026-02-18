@@ -336,6 +336,13 @@ abstract public class Lorm<T extends Lorm<T>> {
     preparedStatement.close();
   }
 
+  /**
+   * Load the model with the given primary key and set all the values of this model to the loaded model values
+   * 
+   * @param connection
+   * @throws SQLException
+   * @throws ModelNotFoundException
+   */
   public void load(Connection connection) throws SQLException, ModelNotFoundException {
     if (reflectContainer.getPrimaryKey() == null)
       throw new LormException("Cannot load a model without primary key");
@@ -355,6 +362,54 @@ abstract public class Lorm<T extends Lorm<T>> {
 
     if (loaded == null)
       throw new ModelNotFoundException("No model found with the given primary key");
+
+    getOldValues().putAll(loaded.getOldValues());
+
+    setLoaded(true);
+  }
+
+  /**
+   * Load the model with the given primary key but only set the values that are
+   * null in this model, if a value is not null it will not be changed.
+   * 
+   * @param connection
+   * @throws SQLException
+   * @throws ModelNotFoundException
+   */
+  public void loadSetNulls(Connection connection) throws SQLException, ModelNotFoundException {
+    if (reflectContainer.getPrimaryKey() == null)
+      throw new LormException("Cannot load a model without primary key");
+
+    var primaryKey = reflectContainer.getPrimaryKey();
+    Object id = null;
+    try {
+      id = primaryKey.getGetter().invoke(this);
+    } catch (IllegalAccessException | InvocationTargetException e) {
+      throw new LormException(e.getMessage());
+    }
+
+    if (id == null)
+      throw new LormException("Cannot load a model with null primary key");
+
+    T loaded = find(id, connection);
+
+    if (loaded == null)
+      throw new ModelNotFoundException("No model found with the given primary key");
+
+    // Set all values that are null in this model to the loaded model values
+    for (var column : reflectContainer.getColumns()) {
+      try {
+        var getter = column.getGetter();
+        var setter = column.getSetter();
+        Object value = getter.invoke(this);
+        if (value == null) {
+          Object loadedValue = getter.invoke(loaded);
+          setter.invoke(this, loadedValue);
+        }
+      } catch (IllegalAccessException | InvocationTargetException e) {
+        throw new LormException(e.getMessage());
+      }
+    }
 
     getOldValues().putAll(loaded.getOldValues());
 
