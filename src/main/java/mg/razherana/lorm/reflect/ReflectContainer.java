@@ -30,6 +30,8 @@ public class ReflectContainer {
 
   @SuppressWarnings("unchecked")
   public static ReflectContainer loadAnnotations(Lorm<?> lorm) {
+    debugAnnotations(lorm.getClass());
+
     ReflectContainer reflectContainer = new ReflectContainer();
 
     Objects.requireNonNull(lorm, "Lorm cannot be null");
@@ -178,6 +180,25 @@ public class ReflectContainer {
     return reflectContainer;
   }
 
+  private static void debugAnnotations(Class<?> clazz) {
+    System.out.println("Debugging annotations for: " + clazz.getName());
+
+    // Class annotations
+    System.out.println("Class annotations:");
+    for (Annotation ann : clazz.getAnnotations()) {
+      System.out.println("  " + ann.annotationType().getName());
+    }
+
+    // Field annotations
+    System.out.println("Field annotations:");
+    for (Field field : clazz.getDeclaredFields()) {
+      System.out.println("  Field: " + field.getName());
+      for (Annotation ann : field.getDeclaredAnnotations()) {
+        System.out.println("    " + ann.annotationType().getName());
+      }
+    }
+  }
+
   @SuppressWarnings("unchecked")
   private static void loadRelationsAnnotations(Lorm<?> lorm, ReflectContainer reflectContainer) {
     HasMany[] hasManies = lorm.getClass().getDeclaredAnnotationsByType(HasMany.class);
@@ -208,20 +229,30 @@ public class ReflectContainer {
       ReflectContainer refRelation = INSTANCES.get(hasMany.model());
 
       if (refRelation == null)
-        throw new AnnotationException("Could not load annot for " + hasMany.model().getSimpleName());
+        throw new AnnotationException(
+            "Could not load annotations for model " + hasMany.model().getName() + " in HasMany on "
+                + lorm.getClass().getName());
 
       // Get the getter from the other Lorm
       var columnInfo1 = refRelation.getColumn(foreignKey);
       if (columnInfo1 == null)
-        throw new AnnotationException("Column not found for foreign key " + foreignKey);
+        throw new AnnotationException(
+            "Column not found for foreign key '" + foreignKey + "' on model "
+                + hasMany.model().getName() + " in HasMany on " + lorm.getClass().getName());
       if (!columnInfo1.foreignKey)
-        throw new AnnotationException("Column is not a foreign key for " + foreignKey);
+        throw new AnnotationException(
+            "Column '" + columnInfo1.columnName + "' (field '" + columnInfo1.field.getName() + "') on model "
+                + hasMany.model().getName()
+                + " is not marked as a foreign key (HasMany on " + lorm.getClass().getName() + ")");
       getter1 = columnInfo1.getter;
 
       // Get the getter from this Lorm
       var columnInfo2 = reflectContainer.getColumn(columnInfo1.foreignName);
       if (columnInfo2 == null)
-        throw new AnnotationException("Column not found for foreign key " + columnInfo1.foreignName);
+        throw new AnnotationException(
+            "Column not found for foreign key '" + columnInfo1.foreignName + "' on model "
+                + lorm.getClass().getName() + " (referenced by HasMany on " + lorm.getClass().getName()
+                + ", target model " + hasMany.model().getName() + ")");
       getter2 = columnInfo2.getter;
 
       final var getterFinal1 = getter1;
@@ -282,21 +313,31 @@ public class ReflectContainer {
       // Get the getter of the other model
       ReflectContainer refRelation = INSTANCES.get(belongsTo.model());
       if (refRelation == null)
-        throw new AnnotationException("Could not load annot for " + belongsTo.model().getSimpleName());
+        throw new AnnotationException(
+            "Could not load annotations for model " + belongsTo.model().getName() + " in BelongsTo on "
+                + lorm.getClass().getName());
 
       // Get the getter from the other Lorm
       var columnInfo1 = reflectContainer.getColumn(foreignKey);
       if (columnInfo1 == null)
-        throw new AnnotationException("Column not found for foreign key " + foreignKey);
+        throw new AnnotationException(
+            "Column not found for foreign key '" + foreignKey + "' on model "
+                + lorm.getClass().getName() + " in BelongsTo to " + belongsTo.model().getName());
       if (!columnInfo1.foreignKey)
-        throw new AnnotationException("Column is not a foreign key for " + foreignKey);
+        throw new AnnotationException(
+            "Column '" + columnInfo1.columnName + "' (field '" + columnInfo1.field.getName() + "') on model "
+                + lorm.getClass().getName()
+                + " is not marked as a foreign key (BelongsTo to " + belongsTo.model().getName() + ")");
 
       getter1 = columnInfo1.getter;
 
       // Get the getter from this Lorm
       var columnInfo2 = refRelation.getColumn(columnInfo1.foreignName);
       if (columnInfo2 == null)
-        throw new AnnotationException("Column not found for foreign key " + columnInfo1.foreignName);
+        throw new AnnotationException(
+            "Column not found for foreign key '" + columnInfo1.foreignName + "' on model "
+                + belongsTo.model().getName() + " (referenced by BelongsTo on " + lorm.getClass().getName()
+                + ")");
       getter2 = columnInfo2.getter;
 
       final var getterFinal1 = getter1;
@@ -356,21 +397,31 @@ public class ReflectContainer {
       // Get the getter of the other model
       ReflectContainer refRelation = INSTANCES.get(belongsTo.model());
       if (refRelation == null)
-        throw new AnnotationException("Could not load annot for " + belongsTo.model().getSimpleName());
+        throw new AnnotationException(
+            "Could not load annotations for model " + belongsTo.model().getName() + " in OneToOne on "
+                + lorm.getClass().getName());
 
       // Get the getter from the other Lorm
       var columnInfo1 = reflectContainer.getColumn(foreignKey);
       if (columnInfo1 == null)
-        throw new AnnotationException("Column not found for foreign key " + foreignKey);
+        throw new AnnotationException(
+            "Column not found for foreign key '" + foreignKey + "' on model "
+                + lorm.getClass().getName() + " in OneToOne to " + belongsTo.model().getName());
       if (!columnInfo1.foreignKey)
-        throw new AnnotationException("Column is not a foreign key for " + foreignKey);
+        throw new AnnotationException(
+            "Column '" + columnInfo1.columnName + "' (field '" + columnInfo1.field.getName() + "') on model "
+                + lorm.getClass().getName()
+                + " is not marked as a foreign key (OneToOne to " + belongsTo.model().getName() + ")");
 
       getter1 = columnInfo1.getter;
 
       // Get the getter from this Lorm
       var columnInfo2 = refRelation.getColumn(columnInfo1.foreignName);
       if (columnInfo2 == null)
-        throw new AnnotationException("Column not found for foreign key " + columnInfo1.foreignName);
+        throw new AnnotationException(
+            "Column not found for foreign key '" + columnInfo1.foreignName + "' on model "
+                + belongsTo.model().getName() + " (referenced by OneToOne on " + lorm.getClass().getName()
+                + ")");
       getter2 = columnInfo2.getter;
 
       final var getterFinal1 = getter1;
