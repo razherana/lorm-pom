@@ -543,13 +543,9 @@ public class ReflectContainer {
 
         // We apply the beforeIn functions if they exist
         if (getBeforeIn().containsKey(columnInfo.columnName)) {
-          System.out.println("[Lorm:info] -> Apply beforeIn for " + columnInfo.columnName + " with value " + value);
           value = getBeforeIn().get(columnInfo.columnName).apply(value);
         }
 
-        System.out.println("[Lorm:info] -> Set value for " + columnInfo.columnName + " : " + value + " ("
-            + value.getClass() + ") " + " for setter "
-            + columnInfo.setter);
         columnInfo.setter.invoke(lorm, value);
 
         lorm.getOldValues().put(columnInfo.columnName, value);
@@ -609,10 +605,5 @@ public class ReflectContainer {
 
   public ColumnInfo getPrimaryKey() {
     return primaryKey;
-  }
-
-  public <T extends Lorm<T>> void copyValues(T loaded, Lorm<T> lorm) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'copyValues'");
   }
 }
