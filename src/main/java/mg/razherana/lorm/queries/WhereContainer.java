@@ -36,39 +36,37 @@ public class WhereContainer {
   }
 
   public static Map.Entry<String, Object[]> toConditionClause(List<WhereContainer> whereContainers) {
-    if (whereContainers == null || whereContainers.size() == 0) 
+    if (whereContainers == null || whereContainers.isEmpty())
       return Map.entry("", new Object[] {});
-    
-    var listWheres = new ArrayList<>();
-    var listWhereNexts = new ArrayList<>();
+
+    StringBuilder where = new StringBuilder();
     ArrayList<Object> queryParams = new ArrayList<>();
 
-    for (WhereContainer whereContainer : whereContainers) {
-      var where = whereContainer.getElement1() + " " + whereContainer.getOperator() + " ";
-      listWhereNexts.add(whereContainer.getNext());
+    for (int i = 0; i < whereContainers.size(); i++) {
+      WhereContainer whereContainer = whereContainers.get(i);
+
+      // Build the condition
+      where.append(whereContainer.getElement1())
+          .append(" ")
+          .append(whereContainer.getOperator())
+          .append(" ");
 
       if (whereContainer.isIntoParameters()) {
-        where += "?";
+        where.append("?");
         queryParams.add(whereContainer.getElement2());
       } else {
-        where += whereContainer.getElement2();
+        where.append(whereContainer.getElement2());
       }
 
-      listWheres.add(where);
-    }
-
-    if (listWheres.size() > 0) {
-      var where = "";
-      for (int i = 0; i < listWheres.size(); i++) {
-        where += listWheres.get(i) + " ";
-        if (i < listWheres.size() - 1 && i > 0)
-          where += listWhereNexts.get(i) + " ";
+      // Add the "next" operator if this is not the last condition
+      if (i < whereContainers.size() - 1) {
+        where.append(" ")
+            .append(whereContainer.getNext())
+            .append(" ");
       }
-
-      return Map.entry(where, queryParams.toArray(Object[]::new));
     }
 
-    return Map.entry("", new Object[] {});
+    return Map.entry(where.toString(), queryParams.toArray(Object[]::new));
   }
 
   public String getNext() {
