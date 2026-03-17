@@ -30,8 +30,6 @@ public class ReflectContainer {
 
   @SuppressWarnings("unchecked")
   public static ReflectContainer loadAnnotations(Lorm<?> lorm) {
-    debugAnnotations(lorm.getClass());
-
     ReflectContainer reflectContainer = new ReflectContainer();
 
     Objects.requireNonNull(lorm, "Lorm cannot be null");
@@ -178,25 +176,6 @@ public class ReflectContainer {
     loadRelationsAnnotations(lorm, reflectContainer);
 
     return reflectContainer;
-  }
-
-  private static void debugAnnotations(Class<?> clazz) {
-    System.out.println("Debugging annotations for: " + clazz.getName());
-
-    // Class annotations
-    System.out.println("Class annotations:");
-    for (Annotation ann : clazz.getAnnotations()) {
-      System.out.println("  " + ann.annotationType().getName());
-    }
-
-    // Field annotations
-    System.out.println("Field annotations:");
-    for (Field field : clazz.getDeclaredFields()) {
-      System.out.println("  Field: " + field.getName());
-      for (Annotation ann : field.getDeclaredAnnotations()) {
-        System.out.println("    " + ann.annotationType().getName());
-      }
-    }
   }
 
   @SuppressWarnings("unchecked")
