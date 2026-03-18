@@ -76,6 +76,37 @@ abstract public class Lorm<T extends Lorm<T>> {
   }
 
   /**
+   * Checks if exists first and split the eager load by dot to add nested eager
+   * loads.
+   * 
+   * Example : "posts.comments" will add "posts" as eager load and "comments" as a
+   * nested eager load of "posts"
+   * 
+   * @param eagerLoad
+   * @return
+   */
+  public Lorm<T> addDotEagerLoad(String eagerLoad) {
+    String[] parts = eagerLoad.split("\\.");
+    NestedEagerLoad current = null;
+
+    if (parts.length > 0) {
+      current = addNestedEagerLoad(parts[0]);
+    }
+
+    for (int i = 1; i < parts.length; i++) {
+      current = current.addNestedEagerLoad(parts[i]);
+    }
+
+    return this;
+  }
+
+  public Lorm<T> addDotEagerLoads(String... eagerLoads) {
+    for (String eagerLoad : eagerLoads)
+      addDotEagerLoad(eagerLoad);
+    return this;
+  }
+
+  /**
    * There are no checking or this
    * 
    * @param eagerLoad
@@ -242,14 +273,24 @@ abstract public class Lorm<T extends Lorm<T>> {
     try {
       if (prim != null) {
         var last = preparedStatement.getGeneratedKeys();
-        if (last.next())
-          prim.setter.invoke(this, last.getInt(1));
+        if (last.next()) {
+          var value = last.getInt(1);
+          prim.setter.invoke(this, value);
+          // Set the old value to the new value
+          getOldValues().put(prim.getColumnName(), value);
+        }
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
 
     preparedStatement.close();
+
+    // Set the old values to the current values after saving
+    getOldValues().putAll(beforeOutValues);
+
+    // Then set loaded to true
+    setLoaded(true);
   }
 
   public void update(Connection connection) throws SQLException {
@@ -337,7 +378,8 @@ abstract public class Lorm<T extends Lorm<T>> {
   }
 
   /**
-   * Load the model with the given primary key and set all the values of this model to the loaded model values
+   * Load the model with the given primary key and set all the values of this
+   * model to the loaded model values
    * 
    * @param connection
    * @throws SQLException
@@ -467,7 +509,9 @@ abstract public class Lorm<T extends Lorm<T>> {
 
   private <U extends Lorm<U>> ArrayList<U> hasManyInstance(Relation<T, U> relation, Connection connection)
       throws SQLException {
-    Objects.requireNonNull(connection, "Not loaded relation, cannot use null as connection");
+    Objects.requireNonNull(connection, "Not loaded relation, cannot use null as connection. Loaded hasMany : "
+        + hasMany.keySet() + ", requested : " + relation.getRelationName());
+
     U other;
     try {
       var constr = relation.getModel2().getDeclaredConstructor();
@@ -549,7 +593,10 @@ abstract public class Lorm<T extends Lorm<T>> {
 
   private <U extends Lorm<U>> U belongsToInstance(Relation<T, U> relation, Connection connection)
       throws SQLException {
-    Objects.requireNonNull(connection, "Not loaded relation, cannot use null as connection");
+    Objects.requireNonNull(connection,
+        "Not loaded relation, cannot use null as connection. Loaded belongsTo/oneToOne : "
+            + oneToOne.keySet() + ", requested : " + relation.getRelationName());
+
     U other;
     try {
       var constr = relation.getModel2().getDeclaredConstructor();
