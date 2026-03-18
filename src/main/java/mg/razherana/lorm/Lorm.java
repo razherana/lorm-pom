@@ -422,7 +422,7 @@ abstract public class Lorm<T extends Lorm<T>> {
 
   // #region [RelationMethods]
 
-  private void loadEagerLoads(ArrayList<T> models, Connection connection) throws SQLException {
+  public void loadEagerLoads(List<T> models, Connection connection) throws SQLException {
     var relationMap = reflectContainer.getRelationMap();
     for (var nested : getEagerLoads()) {
       String eagerLoad = nested.getRelation();
@@ -490,7 +490,7 @@ abstract public class Lorm<T extends Lorm<T>> {
   }
 
   @SuppressWarnings("unchecked")
-  private static <U extends Lorm<U>, T extends Lorm<T>> void hasManyStatic(ArrayList<T> models,
+  private static <U extends Lorm<U>, T extends Lorm<T>> void hasManyStatic(List<T> models,
       Relation<T, U> relation,
       Connection connection, HashSet<NestedEagerLoad> nestedLoads) throws SQLException {
     U other;
