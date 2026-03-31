@@ -462,6 +462,62 @@ abstract public class Lorm<T extends Lorm<T>> {
     return new HashMap<>();
   }
 
+  @Override
+  public int hashCode() {
+    var primaryKey = reflectContainer.getPrimaryKey();
+
+    if (primaryKey == null) {
+      // Compare everything if there is no primary key but this is not recommended and
+      // can lead to performance issues
+      return Objects.hash(reflectContainer.getColumns().stream().map((c) -> {
+        try {
+          return c.getGetter().invoke(this);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+          throw new RuntimeException(e);
+        }
+      }).toArray());
+    }
+
+    try {
+      Object id = primaryKey.getGetter().invoke(this);
+      return id != null ? id.hashCode() : super.hashCode();
+    } catch (IllegalAccessException | InvocationTargetException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null || getClass() != obj.getClass())
+      return false;
+
+    var primaryKey = reflectContainer.getPrimaryKey();
+
+    if (primaryKey == null) {
+      // Compare everything if there is no primary key but this is not recommended and
+      // can lead to performance issues
+      return reflectContainer.getColumns().stream().allMatch((c) -> {
+        try {
+          Object thisValue = c.getGetter().invoke(this);
+          Object otherValue = c.getGetter().invoke(obj);
+          return Objects.equals(thisValue, otherValue);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+          throw new RuntimeException(e);
+        }
+      });
+    }
+
+    try {
+      Object thisId = primaryKey.getGetter().invoke(this);
+      Object otherId = primaryKey.getGetter().invoke(obj);
+      return Objects.equals(thisId, otherId);
+    } catch (IllegalAccessException | InvocationTargetException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   // #region [RelationMethods]
 
   public void loadEagerLoads(List<T> models, Connection connection) throws SQLException {
