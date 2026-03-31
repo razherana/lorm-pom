@@ -274,7 +274,7 @@ abstract public class Lorm<T extends Lorm<T>> {
       if (prim != null) {
         var last = preparedStatement.getGeneratedKeys();
         if (last.next()) {
-          var value = last.getInt(1);
+          var value = last.getObject(1);
           prim.setter.invoke(this, value);
           // Set the old value to the new value
           getOldValues().put(prim.getColumnName(), value);
