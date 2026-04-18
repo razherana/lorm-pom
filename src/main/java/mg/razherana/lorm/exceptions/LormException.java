@@ -8,4 +8,8 @@ public class LormException extends RuntimeException {
   public LormException(Throwable t) {
     super(t);
   }
+
+  public LormException(String message, Throwable t) {
+    super(message, t);
+  }
 }

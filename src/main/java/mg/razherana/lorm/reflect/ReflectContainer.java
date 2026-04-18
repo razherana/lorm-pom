@@ -22,6 +22,7 @@ import mg.razherana.lorm.annot.relations.EagerLoad;
 import mg.razherana.lorm.annot.relations.HasMany;
 import mg.razherana.lorm.annot.relations.OneToOne;
 import mg.razherana.lorm.exceptions.AnnotationException;
+import mg.razherana.lorm.exceptions.LormException;
 import mg.razherana.lorm.relations.Relation;
 import mg.razherana.lorm.relations.RelationType;
 
@@ -531,11 +532,30 @@ public class ReflectContainer {
           value = getBeforeIn().get(columnInfo.columnName).apply(value);
         }
 
-        columnInfo.setter.invoke(lorm, value);
+        try {
+          columnInfo.setter.invoke(lorm, value);
+        } catch (IllegalArgumentException e) {
+          String expectedType = columnInfo.setter.getParameterTypes()[0].getName();
+          String actualType = value != null ? value.getClass().getName() : "null";
+          String message = String.format(
+              "Failed to set column '%s' on model %s: " +
+                  "Setter method '%s' expects parameter type '%s', " +
+                  "but received value of type '%s' with value: %s",
+              columnInfo.columnName,
+              lorm.getClass().getSimpleName(),
+              columnInfo.setter.getName(),
+              expectedType,
+              actualType,
+              value);
+          throw new LormException(message, e);
+        }
 
         lorm.getOldValues().put(columnInfo.columnName, value);
+      } catch (LormException e) {
+        throw e;
       } catch (Exception e) {
-        throw new RuntimeException(e);
+        throw new LormException(
+            "Failed to set column '" + columnInfo.columnName + "' on model " + lorm.getClass().getSimpleName(), e);
       }
     }
 
@@ -554,7 +574,8 @@ public class ReflectContainer {
 
         values.put(columnInfo.columnName, value);
       } catch (Exception e) {
-        e.printStackTrace();
+        throw new LormException("Failed to get value for column '" + columnInfo.columnName + "' on model "
+            + lorm.getClass().getSimpleName(), e);
       }
     }
 
