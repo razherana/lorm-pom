@@ -104,6 +104,11 @@ public class ReflectContainer {
             public boolean indexed() {
               return false;
             }
+
+            @Override
+            public boolean ignoreInInsert() {
+              return false;
+            }
           };
 
         ColumnInfo columnInfo = new ColumnInfo();
@@ -118,6 +123,7 @@ public class ReflectContainer {
             : column.setter();
         boolean indexed = column.indexed();
         columnInfo.indexed = indexed;
+        columnInfo.ignoreInInsert = column.ignoreInInsert();
 
         if (columnInfo.primaryKey) {
           if (reflectContainer.primaryKey != null)

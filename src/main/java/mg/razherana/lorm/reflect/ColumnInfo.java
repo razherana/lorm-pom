@@ -17,6 +17,7 @@ public class ColumnInfo {
   String foreignName;
   Class<? extends Lorm<?>> foreignModel;
   boolean indexed;
+  boolean ignoreInInsert;
 
   public String getColumnName() {
     return columnName;
@@ -56,6 +57,10 @@ public class ColumnInfo {
 
   public Class<? extends Lorm<?>> getForeignModel() {
     return foreignModel;
+  }
+
+  public boolean isIgnoreInInsert() {
+    return ignoreInInsert;
   }
 
   @Override

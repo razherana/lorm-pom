@@ -263,12 +263,20 @@ abstract public class Lorm<T extends Lorm<T>> {
 
     HashMap<String, Object> beforeOutValues = reflectContainer.getBeforeOutInsertValues(this);
 
+    // Apply force insert values to override beforeOutValues
+    forceInsertValues.forEach((columnName, rawSql) -> beforeOutValues.put(columnName, rawSql));
+
+    // Remove columns that should be ignored in insert
+    for (var columnInfo : reflectContainer.getColumns())
+      if (columnInfo.isIgnoreInInsert())
+        beforeOutValues.remove(columnInfo.getColumnName());
+
     for (Map.Entry<String, Object> entry : beforeOutValues.entrySet()) {
       query += entry.getKey() + ", ";
       // Check if this column has a force insert value
-      if (forceInsertValues.containsKey(entry.getKey())) {
+      if (forceInsertValues.containsKey(entry.getKey()))
         values += forceInsertValues.get(entry.getKey()) + ", ";
-      } else {
+      else {
         values += "?, ";
         queryParams.add(entry.getValue());
       }

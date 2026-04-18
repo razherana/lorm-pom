@@ -26,4 +26,9 @@ public @interface Column {
    * Tells that a column is indexed when using in relation.
    */
   public boolean indexed() default false;
+
+  /**
+   * Tells that a column should be ignored when inserting a new record.
+   */
+  public boolean ignoreInInsert() default false;
 }
