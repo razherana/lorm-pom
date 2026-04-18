@@ -30,6 +30,7 @@ abstract public class Lorm<T extends Lorm<T>> {
   private Map<String, Function<Object, ?>> beforeIn = new HashMap<>();
 
   final private Map<String, Object> oldValues = new HashMap<>();
+  private Map<String, String> forceInsertValues = new HashMap<>();
 
   public Map<String, Object> getOldValues() {
     return oldValues;
@@ -162,6 +163,20 @@ abstract public class Lorm<T extends Lorm<T>> {
     this.beforeIn = beforeIn;
   }
 
+  /**
+   * Force insert a raw SQL value for a specific column during save.
+   * The raw SQL will be used directly in the INSERT statement instead of a
+   * parameter placeholder.
+   * 
+   * @param columnName the column name
+   * @param rawSql     the raw SQL expression to use
+   * @return this instance for method chaining
+   */
+  public Lorm<T> forceInsertValue(String columnName, String rawSql) {
+    forceInsertValues.put(columnName, rawSql);
+    return this;
+  }
+
   void setValueFromResultSet(ResultSet resultSet) {
     reflectContainer.setValueFromResultSet(this, resultSet);
   }
@@ -250,8 +265,13 @@ abstract public class Lorm<T extends Lorm<T>> {
 
     for (Map.Entry<String, Object> entry : beforeOutValues.entrySet()) {
       query += entry.getKey() + ", ";
-      values += "?, ";
-      queryParams.add(entry.getValue());
+      // Check if this column has a force insert value
+      if (forceInsertValues.containsKey(entry.getKey())) {
+        values += forceInsertValues.get(entry.getKey()) + ", ";
+      } else {
+        values += "?, ";
+        queryParams.add(entry.getValue());
+      }
     }
 
     // Remove the last comma and space
