@@ -565,12 +565,15 @@ public class ReflectContainer {
   public HashMap<String, Object> getBeforeOutValues(Lorm<?> lorm) {
     HashMap<String, Object> values = new HashMap<>();
 
+    System.out.println(lorm.getClass().getSimpleName() + " -> Get before out values are " + beforeOut.keySet()
+        + " and columns are " + columns.stream().map(c -> c.columnName).toList());
+
     for (ColumnInfo columnInfo : columns) {
       try {
         Object value = columnInfo.getter.invoke(lorm);
 
-        if (lorm.getBeforeOut().containsKey(columnInfo.columnName))
-          value = lorm.getBeforeOut().get(columnInfo.columnName).apply(value);
+        if (beforeOut.containsKey(columnInfo.columnName))
+          value = beforeOut.get(columnInfo.columnName).apply(value);
 
         values.put(columnInfo.columnName, value);
       } catch (Exception e) {

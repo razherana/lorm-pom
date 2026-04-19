@@ -26,9 +26,6 @@ import mg.razherana.lorm.relations.Relation;
 
 abstract public class Lorm<T extends Lorm<T>> {
   final private ReflectContainer reflectContainer;
-  private Map<String, Function<Object, ?>> beforeOut = new HashMap<>();
-  private Map<String, Function<Object, ?>> beforeIn = new HashMap<>();
-
   final private Map<String, Object> oldValues = new HashMap<>();
   private Map<String, String> forceInsertValues = new HashMap<>();
 
@@ -145,22 +142,6 @@ abstract public class Lorm<T extends Lorm<T>> {
 
   public ReflectContainer getReflectContainer() {
     return reflectContainer;
-  }
-
-  public final Map<String, Function<Object, ?>> getBeforeOut() {
-    return beforeOut;
-  }
-
-  public void setBeforeOut(Map<String, Function<Object, ?>> beforeOut) {
-    this.beforeOut = beforeOut;
-  }
-
-  public final Map<String, Function<Object, ?>> getBeforeIn() {
-    return beforeIn;
-  }
-
-  public void setBeforeIn(Map<String, Function<Object, ?>> beforeIn) {
-    this.beforeIn = beforeIn;
   }
 
   /**
