@@ -16,6 +16,7 @@ import java.util.Objects;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 
+import mg.razherana.lorm.annot.general.NotLorm;
 import mg.razherana.lorm.exceptions.LormException;
 import mg.razherana.lorm.exceptions.ModelNotFoundException;
 import mg.razherana.lorm.exceptions.RelationNotFoundException;
@@ -44,7 +45,10 @@ abstract public class Lorm<T extends Lorm<T>> {
   }
 
   public Lorm() {
-    reflectContainer = ReflectContainer.loadAnnotations(this);
+    if (!getClass().isAnnotationPresent(NotLorm.class))
+      reflectContainer = ReflectContainer.loadAnnotations(this);
+    else
+      reflectContainer = null;
     for (String eagerLoad : reflectContainer.getEagerLoads())
       eagerLoads.add(new NestedEagerLoad(eagerLoad));
   }
